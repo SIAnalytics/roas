@@ -1,0 +1,4 @@
+Cython
+mmcv==1.1.1
+shapely
+tqdm
