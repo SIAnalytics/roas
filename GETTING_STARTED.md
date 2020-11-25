@@ -37,6 +37,7 @@ roas_split
 ```
 
 ## Inference with pretrained models
+[Pretrained Weight: RoI Transformer with Resnet101](https://www.dropbox.com/s/mba133silm774hv/epoch_12.pth?dl=0)
 
 
 ### Test a dataset
