@@ -7,13 +7,11 @@ from multiprocessing import Pool
 from geojson2coco import geojson2coco
 import argparse
 
-CLASS_NAMES_EN = ('background', 'small ship', 'large ship', 'civilian aircraft', 'military aircraft', 'small car', 'bus', 'truck', 'train',
-        'crane', 'bridge', 'oil tank', 'dam', 'athletic field', 'helipad', 'roundabout')
 
 def parse_args():
-    parser = argparse.ArgumentParser(description='prepare nia_for_split')
-    parser.add_argument('--srcpath', default='../data/nia_1200')
-    parser.add_argument('--dstpath', default=r'../data/nia-split-512',
+    parser = argparse.ArgumentParser(description='prepare roas_for_split')
+    parser.add_argument('--srcpath', default='../data/roas')
+    parser.add_argument('--dstpath', default=r'../data/roas16-split',
                         help='prepare data')
     args = parser.parse_args()
 

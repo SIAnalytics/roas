@@ -3,20 +3,20 @@ import os
 import pandas as pd
 import argparse
 
-CLASS_NAMES_15 = ('background', 'small ship', 'large ship', 'civilian aircraft', 'military aircraft', 'small car', 'bus', 'truck', 'train',
+CATEGORIES_15 = ('background', 'small ship', 'large ship', 'civilian aircraft', 'military aircraft', 'small car', 'bus', 'truck', 'train',
                'crane', 'bridge', 'oil tank', 'dam', 'athletic field', 'helipad', 'roundabout')
-CLASS_NAMES_16 = ('background', 'small ship', 'large ship', 'civilian aircraft', 'military aircraft', 'small car', 'bus', 'truck', 'train',
+CATEGORIES_16 = ('background', 'small ship', 'large ship', 'civilian aircraft', 'military aircraft', 'small car', 'bus', 'truck', 'train',
                   'crane', 'bridge', 'oil tank', 'dam', 'indoor playground', 'outdoor playground', 'helipad', 'roundabout')
-CLASS_NAMES_20 = ('background', 'small ship', 'large ship', 'civilian aircraft', 'military aircraft', 'small car', 'bus', 'truck', 'train',
+CATEGORIES_20 = ('background', 'small ship', 'large ship', 'civilian aircraft', 'military aircraft', 'small car', 'bus', 'truck', 'train',
                   'crane', 'bridge', 'oil tank', 'dam', 'indoor playground', 'outdoor playground', 'helipad', 'roundabout',
                   'helicopter', 'individual container', 'grouped container', 'swimming pool')
-class_map = {
-        15 : CLASS_NAMES_15,
-        16 : CLASS_NAMES_16,
-        20 : CLASS_NAMES_20}
+category_map = {
+        15 : CATEGORIES_15,
+        16 : CATEGORIES_16,
+        20 : CATEGORIESS_20}
 
 def main(srcpath, dstpath, classes=16):
-    class_names = class_map[classes]
+    categories = category_map[classes]
     
     text_files = glob(os.path.join(srcpath, '*.txt'))
     header_names = ['file_name', 'confidence',
@@ -29,7 +29,7 @@ def main(srcpath, dstpath, classes=16):
     for txt in text_files:
         df = pd.read_csv(txt, delim_whitespace=True,
                     names=header_names)
-        df['class_id'] = class_names.index(txt.split('/')[-1][:-4])
+        df['class_id'] = categories.index(txt.split('/')[-1][:-4])
         df['file_name'] = df['file_name'] + '.png'
         
         dfs.append(df)

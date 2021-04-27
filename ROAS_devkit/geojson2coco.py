@@ -9,10 +9,17 @@ import cv2
 import numpy as np
 from PIL import Image
 
-NIA_CLASSES = ['배경', '소형 선박', '대형 선박', '민간 항공기', '군용 항공기', '소형 승용차', '버스', '트럭', '기차', '크레인', '다리', '정유탱크',
-               '댐', '운동경기장', '헬리패드', '원형 교차로']
-CLASS_NAMES_EN = ('background', 'small ship', 'large ship', 'civilian aircraft', 'military aircraft', 'small car', 'bus', 'truck', 'train',
-        'crane', 'bridge', 'oil tank', 'dam', 'athletic field', 'helipad', 'roundabout')
+CATEGORIES_15 = ('background', 'small ship', 'large ship', 'civilian aircraft', 'military aircraft', 'small car', 'bus', 'truck', 'train',
+               'crane', 'bridge', 'oil tank', 'dam', 'athletic field', 'helipad', 'roundabout')
+CATEGORIES_16 = ('background', 'small ship', 'large ship', 'civilian aircraft', 'military aircraft', 'small car', 'bus', 'truck', 'train',
+                  'crane', 'bridge', 'oil tank', 'dam', 'indoor playground', 'outdoor playground', 'helipad', 'roundabout')
+CATEGORIES_20 = ('background', 'small ship', 'large ship', 'civilian aircraft', 'military aircraft', 'small car', 'bus', 'truck', 'train',
+                  'crane', 'bridge', 'oil tank', 'dam', 'indoor playground', 'outdoor playground', 'helipad', 'roundabout',
+                  'helicopter', 'individual container', 'grouped container', 'swimming pool')
+category_map = {
+        15 : CATEGORIES_15,
+        16 : CATEGORIES_16,
+        20 : CATEGORIESS_20}
 
 
 def convert_xywha_to_8coords(xywha, is_clockwise=False):
@@ -52,7 +59,7 @@ def convert_8coords_to_4coords(coords):
     return [xmin, ymin, w, h]
 
 
-def convert_labels_to_objects(coords, class_ids, class_names, image_ids, difficult=0, is_clockwise=False):
+def convert_labels_to_objects(coords, class_ids, class_names, image_ids, difficult=0, is_clockwise=False, categories=tuple()):
     objs = list()
     inst_count = 1
 
@@ -62,7 +69,7 @@ def convert_labels_to_objects(coords, class_ids, class_names, image_ids, difficu
         single_obj['difficult'] = difficult
         single_obj['area'] = w*h
         if cls_name in CLASS_NAMES_EN:
-            single_obj['category_id'] = CLASS_NAMES_EN.index(cls_name)
+            single_obj['category_id'] = categories.index(cls_name)
         else:
             continue
         single_obj['segmentation'] = [[int(p) for p in polygons]]
@@ -106,14 +113,16 @@ def load_geojsons(filepath):
     return image_ids, obj_coords, class_indices, class_names
 
 
-def geojson2coco(imageroot: str, geojsonpath: str, destfile, difficult='-1'):
+def geojson2coco(imageroot: str, geojsonpath: str, destfile, difficult='-1', classes=16):
     # set difficult to filter '2', '1', or do not filter, set '-1'
 
     data_dict = {}
     data_dict['images'] = []
     data_dict['categories'] = []
     data_dict['annotations'] = []
-    for idex, name in enumerate(CLASS_NAMES_EN[1:]):
+
+    categories =  category_map[classes]
+    for idex, name in enumerate(categories[1:]):
         single_cat = {'id': idex + 1, 'name': name, 'supercategory': name}
         data_dict['categories'].append(single_cat)
 
@@ -124,7 +133,8 @@ def geojson2coco(imageroot: str, geojsonpath: str, destfile, difficult='-1'):
             img_files, obj_coords, cls_ids, class_names = load_geojsons(geojsonpath)
             img_id_map= {img_file:i+1 for i, img_file in enumerate(list(set(img_files)))}
             image_ids = [img_id_map[img_file] for img_file in img_files]
-            objs = convert_labels_to_objects(obj_coords, cls_ids, class_names, image_ids, difficult=difficult, is_clockwise=False)
+            objs = convert_labels_to_objects(obj_coords, cls_ids, class_names, image_ids, difficult=difficult,
+                                             is_clockwise=False, categories=categories)
             data_dict['annotations'].extend(objs)
         else:
             img_files = [i for i in os.listdir(imageroot) if 'png' in i]
@@ -147,7 +157,7 @@ def geojson2coco(imageroot: str, geojsonpath: str, destfile, difficult='-1'):
 
 if __name__ == '__main__':
 
-    rootfolder = '/mnt/workspace/hakjinlee/datasets/NIA20A/'
+    rootfolder = 'data/roas/'
 
     geojson2coco(imageroot=os.path.join(rootfolder, 'train/images'),
                  geojsonpath=os.path.join(rootfolder, 'train/json'),
