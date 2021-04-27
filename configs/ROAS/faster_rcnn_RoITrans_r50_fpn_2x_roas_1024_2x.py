@@ -141,8 +141,8 @@ test_cfg = dict(
     # e.g., nms=dict(type='soft_nms', iou_thr=0.5, min_score=0.05)
 )
 # dataset settings
-dataset_type = 'NIA2020'
-data_root = 'data/nia-split-512/'
+dataset_type = 'ROAS'
+data_root = 'data/roas-split-512/'
 img_norm_cfg = dict(
     mean=[123.675, 116.28, 103.53], std=[58.395, 57.12, 57.375], to_rgb=True)
 data = dict(
@@ -214,7 +214,7 @@ total_epochs = 24
 device_ids = range(4)
 dist_params = dict(backend='nccl')
 log_level = 'INFO'
-work_dir = './work_dirs/faster_rcnn_RoITrans_r50_fpn_2x_nia_1024_2x'
+work_dir = './work_dirs/faster_rcnn_RoITrans_r50_fpn_2x_roas_1024'
 load_from = None
 resume_from = None
 workflow = [('train', 1)]
