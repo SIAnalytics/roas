@@ -27,7 +27,7 @@ python ROAS_devkit/prepare_roas.py --srcpath path_to_dota --dstpath path_to_spli
 ```
 Then you will get data in the following structure
 ```
-roas_split
+roas16-split
 ├── test1024_2x
 │   ├── coco.json
 │   └── images
@@ -65,15 +65,15 @@ Assume that you have already downloaded the checkpoints to `work_dirs/`.
 1. Test Faster R-CNN with RoI Transformer. [Pretrained Weight: RoI Transformer with Resnet101](https://drive.google.com/file/d/1q99Lg9hw2AvLuS0NUXzWisQKEMjPR7DI/view?usp=sharing)
 
 ```shell
-python tools/test.py configs/ROAS/faster_rcnn_RoITrans_r101_fpn_2x_roas_768.py \
-    work_dirs/faster_rcnn_RoITrans_r101_fpn_2x_roas_768/epoch_12.pth
+python tools/test.py configs/ROAS/faster_rcnn_RoITrans_r101_fpn_2x_roas16.py \
+    work_dirs/faster_rcnn_RoITrans_r101_fpn_2x_roas16/epoch_12.pth
 ```
 
 2. Test Faster R-CNN with RoI Ttransformer with 4 GPUs.
 
 ```shell
-./tools/dist_test.sh configs/ROAS/faster_rcnn_RoITrans_r101_fpn_2x_roas_768.py \
-    work_dirs/faster_rcnn_RoITrans_r101_fpn_2x_roas_768/epoch_12.pth  \
+./tools/dist_test.sh configs/ROAS/faster_rcnn_RoITrans_r101_fpn_2x_roas16.py \
+    work_dirs/faster_rcnn_RoITrans_r101_fpn_2x_roas16/epoch_12.pth  \
     4 
 ```
 
@@ -81,7 +81,7 @@ python tools/test.py configs/ROAS/faster_rcnn_RoITrans_r101_fpn_2x_roas_768.py \
 
 For methods with only OBB Head, set the type OBB.
 ```
-python tools/parse_results.py --config configs/ROAS/faster_rcnn_RoITrans_r101_fpn_2x_roas_768.py --type OBB
+python tools/parse_results.py --config configs/ROAS/faster_rcnn_RoITrans_r101_fpn_2x_roas16.py --type OBB
 ```
 
 4. Merge results as csv
@@ -93,6 +93,7 @@ python3 ROAS_devkit/merge_results_as_csv.py --srcpath ${PARSING PATH}$ --dstpath
 ```
 python3 ROAS_devkit/evaluate_roas.py --gt_csv_path ${GT_PATH}$ --pred_csv_path ${PRED_PATH}
 ```
+You have to prepare csv file for ground-truth by **./ROAS_devkit/geojson2csv.py**.
 
 ### Demo of inference in a large size image.
 
