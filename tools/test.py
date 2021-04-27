@@ -2,19 +2,30 @@ import argparse
 import os.path as osp
 import shutil
 import tempfile
-import os
 
 import mmcv
 import torch
 import torch.distributed as dist
-from mmcv.runner import load_checkpoint, get_dist_info
+from mmcv.runner import load_checkpoint, get_dist_info, init_dist
 from mmcv.parallel import MMDataParallel, MMDistributedDataParallel
 
-from mmdet.apis import init_dist
 from mmdet.core import results2json, coco_eval
 from mmdet.datasets import build_dataloader, get_dataset
 from mmdet.models import build_detector
 import time
+
+def convert_output_to_csv(dataset, outputs, dstpath):
+    img_files = [i['file_name'] for i in dataset.img_infos]
+    with open(dstpath, 'w') as f:
+        f.write('file_name,class_id,confidence,point1_x,point1_y,point2_x,point2_y,point3_x,point3_y,point4_x,point4_y\n')
+        for img_file, all_infer in zip(img_files, outputs):
+            for cls_infer in all_infer:
+                for instance_infer in cls_infer:
+                    instance_infer = instance_infer.tolist()
+                    confidence = str(instance_infer[-1])
+                    points = list(map(str, instance_infer[:-1]))
+                    line = ','.join([img_file, confidence, *points]) + '\n'
+                    f.write(line)
 
 def get_time_str():
     return time.strftime('%Y%m%d_%H%M%S', time.localtime())
@@ -115,6 +126,7 @@ def parse_args():
     parser.add_argument('config', help='test config file path')
     parser.add_argument('checkpoint', help='checkpoint file')
     parser.add_argument('--out', help='output result file')
+    parser.add_argument('--csv', action='store_true', help='write results as csv')
     parser.add_argument(
         '--eval',
         type=str,
@@ -139,8 +151,6 @@ def main():
 
     if args.out is not None and not args.out.endswith(('.pkl', '.pickle')):
         raise ValueError('The output file must be a pkl file.')
-    elif args.out is None:
-        args.out = os.path.join(os.path.dirname(args.checkpoint), 'results.pkl')
 
     cfg = mmcv.Config.fromfile(args.config)
     # set cudnn_benchmark
@@ -156,12 +166,14 @@ def main():
         distributed = True
         init_dist(args.launcher, **cfg.dist_params)
 
+    imgs_per_gpu = cfg.data.test.pop('imgs_per_gpu', 1)
+
     # build the dataloader
     # TODO: support multiple images per gpu (only minor changes are needed)
     dataset = get_dataset(cfg.data.test)
     data_loader = build_dataloader(
         dataset,
-        imgs_per_gpu=1,
+        imgs_per_gpu=imgs_per_gpu,
         workers_per_gpu=cfg.data.workers_per_gpu,
         dist=distributed,
         shuffle=False)
@@ -188,6 +200,11 @@ def main():
         print('\nwriting results to {}'.format(args.out))
         mmcv.dump(outputs, args.out)
         eval_types = args.eval
+        if args.csv:
+            csv_path = (args.out).replace('.pkl', '.csv')
+            print('\nwriting results as csv to {}'.format(csv_path))
+            convert_output_to_csv(dataset, outputs, csv_path)
+
         if eval_types:
             print('Starting evaluate {}'.format(' and '.join(eval_types)))
             if eval_types == ['proposal_fast']:
