@@ -62,7 +62,7 @@ Examples:
 
 Assume that you have already downloaded the checkpoints to `work_dirs/`.
 
-1. Test Faster R-CNN with RoI Transformer. [Pretrained Weight: RoI Transformer with Resnet101](https://www.dropbox.com/s/mba133silm774hv/epoch_12.pth?dl=0)
+1. Test Faster R-CNN with RoI Transformer. [Pretrained Weight: RoI Transformer with Resnet101](https://drive.google.com/file/d/1q99Lg9hw2AvLuS0NUXzWisQKEMjPR7DI/view?usp=sharing)
 
 ```shell
 python tools/test.py configs/ROAS/faster_rcnn_RoITrans_r101_fpn_2x_roas_768.py \
