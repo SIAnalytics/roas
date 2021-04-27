@@ -146,101 +146,48 @@ data_root = 'data/roas16-split/'
 img_norm_cfg = dict(
     mean=[123.675, 116.28, 103.53], std=[58.395, 57.12, 57.375], to_rgb=True)
 
-train_pipeline = [
-    dict(type='LoadImageFromFile'),
-    dict(type='LoadAnnotations', with_bbox=True, with_mask=True),
-    dict(type='Resize', img_scale=(1024, 1024), keep_ratio=True),
-    dict(type='RandomFlip', flip_ratio=0.5),
-    dict(type='Normalize', **img_norm_cfg),
-    dict(type='Pad', size_divisor=32),
-    dict(type='DefaultFormatBundle'),
-    dict(type='Collect', keys=['img', 'gt_bboxes', 'gt_labels', 'gt_masks']),
-]
-
-test_pipeline = [
-    dict(type='LoadImageFromFile'),
-    dict(
-        type='MultiScaleFlipAug',
-        #img_scale=[(1024, 1024), (2048, 2048), (512, 512)],
-        img_scale=(1024, 1024),
-        flip=False,
-        transforms=[
-            dict(type='Resize', keep_ratio=True),
-            dict(type='RandomFlip'),
-            dict(type='Normalize', **img_norm_cfg),
-            dict(type='Pad', size_divisor=32),
-            dict(type='ImageToTensor', keys=['img']),
-            dict(type='Collect', keys=['img']),
-        ])
-]
-
 data = dict(
-    samples_per_gpu=12,
-    workers_per_gpu=2,
+    imgs_per_gpu=12,
+    workers_per_gpu=4,
     train=dict(
-        _delete_ = True,
-        type='ClassBalancedDataset',
-        oversample_thr=1e-3,
-        dataset=dict(
-            type=dataset_type,
-            ann_file=data_root + 'train768_2x_1200/coco.json',
-            img_prefix=data_root + 'train768_2x_1200/images',
-            #ann_file=data_root + 'train/coco.json',
-            #img_prefix=data_root + 'train/',
-            pipeline=train_pipeline)),
+        type=dataset_type,
+        ann_file=data_root + 'train768_2x/coco.json',
+        img_prefix=data_root + 'train768_2x/images',
+        img_scale=(1024, 1024),
+        img_norm_cfg=img_norm_cfg,
+        size_divisor=32,
+        flip_ratio=0.5,
+        with_mask=True,
+        with_crowd=True,
+        with_label=True,
+        ),
+    # val=dict(
+    #     type=dataset_type,
+    #     ann_file=data_root + 'test/testcoco.json',
+    #     img_prefix=data_root + 'test/images',
+    #     img_scale=(1024, 1024),
+    #     img_norm_cfg=img_norm_cfg,
+    #     size_divisor=32,
+    #     flip_ratio=0,
+    #     with_mask=True,
+    #     with_crowd=True,
+    #     with_label=True),
     test=dict(
         type=dataset_type,
         ann_file=data_root + 'test1024_2x/coco.json',
         img_prefix=data_root + 'test1024_2x/images',
-        #ann_file=data_root + 'val/coco.json',
-        #img_prefix=data_root + 'val/',
-        pipeline=test_pipeline))
+        #ann_file= 'data/nia/test/testcoco.json',
+        #img_prefix= 'data/nia/test/images',
+        # ann_file=data_root + 'test1024_ms/DOTA_test1024_ms.json',
+        # img_prefix=data_root + 'test1024_ms/images',
+        img_scale=(1024, 1024),
+        img_norm_cfg=img_norm_cfg,
+        size_divisor=32,
+        flip_ratio=0,
+        with_mask=False,
+        with_label=False,
+        test_mode=True))
 
-#data = dict(
-#    imgs_per_gpu=12,
-#    workers_per_gpu=8,
-#    train=dict(
-#        _delete_=True,
-#        type='ClassBalancedDataset',
-#        oversample_thr=1e-3,
-#        dataset=dict(
-#            type=dataset_type,
-#            ann_file=data_root + 'train768_2x_1200/coco.json',
-#            img_prefix=data_root + 'train768_2x_1200/images',
-#            img_scale=(1024, 1024),
-#            img_norm_cfg=img_norm_cfg,
-#            size_divisor=32,
-#            flip_ratio=0.5,
-#            with_mask=True,
-#            with_crowd=True,
-#            with_label=True,
-#        )),
-#    # val=dict(
-#    #     type=dataset_type,
-#    #     ann_file=data_root + 'test/testcoco.json',
-#    #     img_prefix=data_root + 'test/images',
-#    #     img_scale=(1024, 1024),
-#    #     img_norm_cfg=img_norm_cfg,
-#    #     size_divisor=32,
-#    #     flip_ratio=0,
-#    #     with_mask=True,
-#    #     with_crowd=True,
-#    #     with_label=True),
-#    test=dict(
-#        type=dataset_type,
-#        ann_file=data_root + 'test768_2x/coco.json',
-#        img_prefix=data_root + 'test768_2x/images',
-#        #ann_file= 'data/nia/test/testcoco.json',
-#        #img_prefix= 'data/nia/test/images',
-#        # ann_file=data_root + 'test1024_ms/DOTA_test1024_ms.json',
-#        # img_prefix=data_root + 'test1024_ms/images',
-#        img_scale=(1024, 1024),
-#        img_norm_cfg=img_norm_cfg,
-#        size_divisor=32,
-#        flip_ratio=0,
-#        with_mask=False,
-#        with_label=False,
-#        test_mode=True))
 # optimizer
 optimizer = dict(type='SGD', lr=0.01, momentum=0.9, weight_decay=0.0001)
 optimizer_config = dict(grad_clip=dict(max_norm=35, norm_type=2))
