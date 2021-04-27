@@ -3,10 +3,21 @@ import os
 import pandas as pd
 import argparse
 
-CLASS_NAMES =('background', 'small ship', 'large ship', 'civilian aircraft', 'military aircraft', 'small car', 'bus', 'truck', 'train',
-        'crane', 'bridge', 'oil tank', 'dam', 'athletic field', 'helipad', 'roundabout')
+CLASS_NAMES_15 = ('background', 'small ship', 'large ship', 'civilian aircraft', 'military aircraft', 'small car', 'bus', 'truck', 'train',
+               'crane', 'bridge', 'oil tank', 'dam', 'athletic field', 'helipad', 'roundabout')
+CLASS_NAMES_16 = ('background', 'small ship', 'large ship', 'civilian aircraft', 'military aircraft', 'small car', 'bus', 'truck', 'train',
+                  'crane', 'bridge', 'oil tank', 'dam', 'indoor playground', 'outdoor playground', 'helipad', 'roundabout')
+CLASS_NAMES_20 = ('background', 'small ship', 'large ship', 'civilian aircraft', 'military aircraft', 'small car', 'bus', 'truck', 'train',
+                  'crane', 'bridge', 'oil tank', 'dam', 'indoor playground', 'outdoor playground', 'helipad', 'roundabout',
+                  'helicopter', 'individual container', 'grouped container', 'swimming pool')
+class_map = {
+        15 : CLASS_NAMES_15,
+        16 : CLASS_NAMES_16,
+        20 : CLASS_NAMES_20}
 
-def main(srcpath, dstpath):
+def main(srcpath, dstpath, classes=16):
+    class_names = class_map[classes]
+    
     text_files = glob(os.path.join(srcpath, '*.txt'))
     header_names = ['file_name', 'confidence',
                     'point1_x', 'point1_y',
@@ -18,7 +29,7 @@ def main(srcpath, dstpath):
     for txt in text_files:
         df = pd.read_csv(txt, delim_whitespace=True,
                     names=header_names)
-        df['class_id'] = CLASS_NAMES.index(txt.split('/')[-1][:-4])
+        df['class_id'] = class_names.index(txt.split('/')[-1][:-4])
         df['file_name'] = df['file_name'] + '.png'
         
         dfs.append(df)
@@ -35,8 +46,9 @@ def main(srcpath, dstpath):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='merge dota class results to csv file')
     parser.add_argument('--srcpath', )
+    parser.add_argument('--classes', default=16)
     parser.add_argument('--dstpath', default='result.csv')
 
     args = parser.parse_args()
 
-    main(args.srcpath, args.dstpath)
+    main(args.srcpath, args.dstpath, args.classes)
